@@ -1110,11 +1110,11 @@ class GitConfig {
     if (this.browseFiles && (inputName == null || "" == inputName)) {
       inputName = "/"; 
     }
-      
-      
+    
     //note, add in commit here?
     if ((!inputName.contains("/") || (!getFiles)) && ( this.repo == null || "" == this.repo)) {
       File inputFile = new File(inputName);
+      
       if (inputFile.exists()) {
         
         //      returns repoName__fullyQualifiedFileName
@@ -1139,7 +1139,7 @@ class GitConfig {
     }
     
     if (!inputName.startsWith("/")) {
-      println("This file has not been associated with a git repo file, it must start with /   : " + inputName);
+      println("This file has not been associated with a git repo file (or dont pass in the repo), it must start with /   : " + inputName);
       System.exit(1);
     }
     
