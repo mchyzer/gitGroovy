@@ -166,7 +166,7 @@ class GitTask {
   }
 
   /** copy one file to another, return true if copied over existing, false if created */
-  def copy(fileFrom, File fileTo) {
+  def copy(fileFrom, fileTo) {
     
     if (fileFrom instanceof String) {
       fileFrom = new File(fileFrom);
