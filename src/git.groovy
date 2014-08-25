@@ -111,7 +111,7 @@ class GitTask {
     //[appadmin@lukes bin]$ md5sum days-since-1970.sh
     //8410e4d639a59b109c1ac893d5c27eda  days-since-1970.sh
 
-    def md5sumProc = ("/usr/bin/md5sum " + fileName).execute()
+    def md5sumProc = ("/usr/bin/md5sum " + escapeForUnixCommand(fileName)).execute()
 
     md5sumProc.waitFor();
 
@@ -139,7 +139,7 @@ class GitTask {
   def move(fileNameFrom, fileNameTo) {
 
     def debugFlag = this.gitConfig.debugMode ? " -v " : "";
-    def moveCommand = "/bin/mv " + debugFlag +  fileNameFrom + " " + fileNameTo;
+    def moveCommand = "/bin/mv " + debugFlag +  escapeForUnixCommand(fileNameFrom) + " " + escapeForUnixCommand(fileNameTo);
 
     def moveProc = ("/bin/bash -s ").execute();
 
@@ -165,6 +165,14 @@ class GitTask {
     }
   }
 
+  def escapeForUnixCommand(String someString) {
+    if (someString == null) {
+      return someString;
+    }
+    someString = someString.replace(" ", "\\ ");
+    return someString;
+  }
+  
   /** copy one file to another, return true if copied over existing, false if created */
   def copy(fileFrom, fileTo) {
     
@@ -194,7 +202,7 @@ class GitTask {
       copyProc = ("/bin/bash -s ").execute();
 
       //cat this so that the execute permissions and such dont change
-      copyProc.out << ("cat \"" + fileFromPath + "\" > \"" + fileToPath + "\"");
+      copyProc.out << ("cat " + escapeForUnixCommand(fileFromPath) + " > " + escapeForUnixCommand(fileToPath));
       copyProc.out.flush();
       copyProc.out.close();
 
@@ -203,7 +211,7 @@ class GitTask {
       if (!fileTo.getParentFile().exists()) {
 
         // make parent dirs
-        def mkdirProc = ("/bin/mkdir -p \"" + fileTo.getParentFile().getCanonicalFile() + "\"").execute();
+        def mkdirProc = ("/bin/mkdir -p " + escapeForUnixCommand(fileTo.getParentFile().getCanonicalFile())).execute();
 
         mkdirProc.waitFor();
 
@@ -218,7 +226,7 @@ class GitTask {
         }
       }
     
-      copyProc = ("/bin/cp -p \"" + fileFromPath + "\" \"" + fileToPath + "\"").execute();
+      copyProc = ("/bin/cp -p " + escapeForUnixCommand(fileFromPath) + " " + escapeForUnixCommand(fileToPath)).execute();
     }
 
 
@@ -295,7 +303,7 @@ class GitTask {
    */
   def diff(first, second, printResults) {
 
-    def diffProc = ('diff ' + first + ' ' + second).execute();
+    def diffProc = ('diff ' + escapeForUnixCommand(first) + ' ' + escapeForUnixCommand(second)).execute();
 
     diffProc.waitFor();
 
@@ -597,13 +605,13 @@ class GitTask {
       if (needsAdd) {        
         //we need to add to repo
         //  git add stuff.txt
-        this.run("cd " + localGitFile.getParentFile().getAbsolutePath() + "\n/usr/bin/git add " + localGitFile.getName(), true, true, true, true);
+        this.run("cd " + escapeForUnixCommand(localGitFile.getParentFile().getAbsolutePath()) + "\n/usr/bin/git add " + escapeForUnixCommand(localGitFile.getName()), true, true, true, true);
 
       }
       
       //  git commit stuff.txt -m "adding"
       // git push origin master
-      this.run("cd " + localGitFile.getParentFile().getAbsolutePath() + "\n/usr/bin/git commit " + localGitFile.getName() 
+      this.run("cd " + escapeForUnixCommand(localGitFile.getParentFile().getAbsolutePath()) + "\n/usr/bin/git commit " + escapeForUnixCommand(localGitFile.getName())
         + " -m '" + this.gitConfig.comment +  "'\n/usr/bin/git push origin master", true, true, true, true);
       
       //lets register this linking in the state file if it is not already there
@@ -629,9 +637,9 @@ class GitTask {
 
       //lets just ls that dir, or ls from the parent dir for a file
       if (localGitFile.isDirectory()) {
-        this.run("ls -lat " + localGitFile.getAbsolutePath() + " | grep -v ' .git' | grep -v ' \\.\$' | grep -v ' \\.\\.\$'", true, true, true, true);
+        this.run("ls -lat " + escapeForUnixCommand(localGitFile.getAbsolutePath()) + " | grep -v ' .git' | grep -v ' \\.\$' | grep -v ' \\.\\.\$'", true, true, true, true);
       } else {
-        this.run("cd " + localGitFile.getParentFile().getAbsolutePath() + "\nls -lat " + localGitFile.getName() + " | grep -v ' .git' | grep -v ' \\.\$' | grep -v ' \\.\\.\$'", true, true, true, true);
+        this.run("cd " + escapeForUnixCommand(localGitFile.getParentFile().getAbsolutePath()) + "\nls -lat " + escapeForUnixCommand(localGitFile.getName()) + " | grep -v ' .git' | grep -v ' \\.\$' | grep -v ' \\.\\.\$'", true, true, true, true);
       }
 
     }
@@ -660,7 +668,7 @@ class GitTask {
         continue;
       }
 
-      this.run("cd " + localGitFile.getParentFile().getAbsolutePath() + "\n/usr/bin/git blame " + localGitFile.getName(), true, true, true, true);
+      this.run("cd " + escapeForUnixCommand(localGitFile.getParentFile().getAbsolutePath()) + "\n/usr/bin/git blame " + escapeForUnixCommand(localGitFile.getName()), true, true, true, true);
 
     }
   }
@@ -688,7 +696,7 @@ class GitTask {
         continue;
       }
 
-      this.run("cd " + localGitFile.getParentFile().getAbsolutePath() + "\n/usr/bin/git log -50 " + localGitFile.getName(), true, true, true, true);
+      this.run("cd " + escapeForUnixCommand(localGitFile.getParentFile().getAbsolutePath()) + "\n/usr/bin/git log -50 " + escapeForUnixCommand(localGitFile.getName()), true, true, true, true);
 
     }
   }
