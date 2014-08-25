@@ -166,7 +166,7 @@ class GitTask {
   }
 
   /** copy one file to another, return true if copied over existing, false if created */
-  def copy(fileFrom, fileTo) {
+  def copy(fileFrom, File fileTo) {
     
     if (fileFrom instanceof String) {
       fileFrom = new File(fileFrom);
@@ -199,6 +199,25 @@ class GitTask {
       copyProc.out.close();
 
     } else {
+
+      if (!fileTo.getParentFile().exists()) {
+
+        // make parent dirs
+        def mkdirProc = ("/bin/mkdir -p " + fileTo.getParentFile().getCanonicalFile()).execute();
+
+        mkdirProc.waitFor();
+
+        if (mkdirProc.exitValue() != 0) {
+
+          println("Couldnt make parent dirs: " + fileTo.getParentFile().getCanonicalFile());
+          //stdout and err
+          println copyProc.in.text
+          println copyProc.err.text
+          System.exit(1);
+    
+        }
+      }
+    
       copyProc = ("/bin/cp -p " + fileFromPath + " " + fileToPath).execute();
     }
 
@@ -370,6 +389,8 @@ class GitTask {
     this.gitConfig.logDebug("repo url is " + this.gitConfig().gitUrl());
 
     File repoDir = this.gitConfig().repoDir();
+    
+    this.gitConfig.logDebug("repo dir is " + repoDir.getAbsolutePath());
     
     if (!repoDir.exists()) {
 
@@ -959,7 +980,11 @@ class GitConfig {
    * @return the repo dir
    */
   File repoDir() {
-    return new File(this.repoParentDir().getAbsolutePath() + "/" + this.repoDirName());
+    String dirName = this.repoParentDir().getAbsolutePath() + "/" + this.repoDirName();
+    if (dirName.endsWith(".git")) {
+      dirName = dirName.substring(0, dirName.length()-4);
+    }
+    return new File(dirName);
   }
 
   /**
@@ -1072,9 +1097,10 @@ class GitConfig {
     }
 
     if (!validCommand) {
-      println("Usage: git.groovy get|compare|history|annotate|browse [absoluteFilename] [comment]\n");
+      println("Usage: git.groovy get|commit|compare|history|annotate|browse [absoluteFilename] [comment]\n");
       println("The first argument:\n");
       println("get - get from git and overwrite (and keep backup)");
+      println("commit - store a file back to git");
       println("history - see change log");
       println("compare - see difference between git and local, or browser");
       println("browse - view files in repository");
