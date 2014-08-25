@@ -194,7 +194,7 @@ class GitTask {
       copyProc = ("/bin/bash -s ").execute();
 
       //cat this so that the execute permissions and such dont change
-      copyProc.out << ("cat " + fileFromPath + " > " + fileToPath);
+      copyProc.out << ("cat \"" + fileFromPath + "\" > \"" + fileToPath + "\"");
       copyProc.out.flush();
       copyProc.out.close();
 
@@ -203,7 +203,7 @@ class GitTask {
       if (!fileTo.getParentFile().exists()) {
 
         // make parent dirs
-        def mkdirProc = ("/bin/mkdir -p " + fileTo.getParentFile().getCanonicalFile()).execute();
+        def mkdirProc = ("/bin/mkdir -p \"" + fileTo.getParentFile().getCanonicalFile() + "\"").execute();
 
         mkdirProc.waitFor();
 
@@ -218,7 +218,7 @@ class GitTask {
         }
       }
     
-      copyProc = ("/bin/cp -p " + fileFromPath + " " + fileToPath).execute();
+      copyProc = ("/bin/cp -p \"" + fileFromPath + "\" \"" + fileToPath + "\"").execute();
     }
 
 
