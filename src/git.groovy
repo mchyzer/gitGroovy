@@ -501,7 +501,7 @@ class GitTask {
         + ",  with: " + localGitFile.getCanonicalPath());
 
       //see if no differences
-      if (normalOsFile.exists() && !fileObject.diffLocalWithGit(false)) {
+      if (!normalOsFile.isDirectory() && normalOsFile.exists() && !fileObject.diffLocalWithGit(false)) {
 
         println("No changes between " + normalOsFile.getCanonicalPath()
           + " and repository file: " + fileObject.gitFile.getAbsolutePath());
