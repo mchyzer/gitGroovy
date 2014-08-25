@@ -194,7 +194,7 @@ class GitTask {
     
     def copyProc;
     def fileToExists = fileTo.exists();
-    if (fileToExists) {
+    if (fileToExists && !fileFrom.isDirectory()) {
 
       copyProc = ("/bin/bash -s ").execute();
 
@@ -223,7 +223,7 @@ class GitTask {
         }
       }
     
-      copyProc = (["/bin/cp", "-p", fileFromPath, fileToPath] ).execute();
+      copyProc = (["/bin/cp", "-p" + (fileFrom.isDirectory() ? "R" : ""), fileFromPath, fileToPath] ).execute();
     }
 
 
