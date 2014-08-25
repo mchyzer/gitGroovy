@@ -111,7 +111,7 @@ class GitTask {
     //[appadmin@lukes bin]$ md5sum days-since-1970.sh
     //8410e4d639a59b109c1ac893d5c27eda  days-since-1970.sh
 
-    def md5sumProc = ("/usr/bin/md5sum " + escapeForUnixCommand(fileName)).execute()
+    def md5sumProc = (["/usr/bin/md5sum", fileName]).execute()
 
     md5sumProc.waitFor();
 
@@ -139,14 +139,11 @@ class GitTask {
   def move(fileNameFrom, fileNameTo) {
 
     def debugFlag = this.gitConfig.debugMode ? " -v " : "";
-    def moveCommand = "/bin/mv " + debugFlag +  escapeForUnixCommand(fileNameFrom) + " " + escapeForUnixCommand(fileNameTo);
 
-    def moveProc = ("/bin/bash -s ").execute();
+    def moveProc = (["/bin/mv", debugFlag, fileNameFrom, fileNameTo]).execute();
 
     //cat this so that the wildcard works
-    moveProc.out << moveCommand;
-    moveProc.out.flush();
-    moveProc.out.close();
+    //moveProc.out << moveCommand;
 
     moveProc.waitFor();
 
@@ -211,7 +208,7 @@ class GitTask {
       if (!fileTo.getParentFile().exists()) {
 
         // make parent dirs
-        def mkdirProc = ("/bin/mkdir -p " + escapeForUnixCommand(fileTo.getParentFile().getCanonicalFile())).execute();
+        def mkdirProc = (["/bin/mkdir", "-p", fileTo.getParentFile().getCanonicalFile()]).execute();
 
         mkdirProc.waitFor();
 
@@ -226,7 +223,7 @@ class GitTask {
         }
       }
     
-      copyProc = ("/bin/cp -p " + escapeForUnixCommand(fileFromPath) + " " + escapeForUnixCommand(fileToPath)).execute();
+      copyProc = (["/bin/cp", "-p", fileFromPath, fileToPath] ).execute();
     }
 
 
@@ -303,7 +300,7 @@ class GitTask {
    */
   def diff(first, second, printResults) {
 
-    def diffProc = ('diff ' + escapeForUnixCommand(first) + ' ' + escapeForUnixCommand(second)).execute();
+    def diffProc = (['diff', first, second]).execute();
 
     diffProc.waitFor();
 
